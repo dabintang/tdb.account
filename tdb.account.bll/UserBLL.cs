@@ -50,6 +50,12 @@ namespace tdb.account.bll
                 return AccHelper.FailItemRes(AccConfig.Msg.ErrUserCodeOrPassword, "");
             }
 
+            //是否可用
+            if (user.Enable == false)
+            {
+                return AccHelper.FailItemRes(AccConfig.Msg.DisableUser, "");
+            }
+
             //密码加密成MD5
             var pwd = EncryptHelper.Md5(req.Password);
 

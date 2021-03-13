@@ -18,6 +18,11 @@ namespace tdb.account.common.Config
         /// 登录名或密码不对
         /// </summary>
         public MsgInfo ErrUserCodeOrPassword { get; set; }
+
+        /// <summary>
+        /// 用户已禁用
+        /// </summary>
+        public MsgInfo DisableUser { get; set; }
     }
 
     /// <summary>

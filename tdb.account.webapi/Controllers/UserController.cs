@@ -52,7 +52,7 @@ namespace tdb.account.webapi.Controllers
         //[HttpPost]
         //public BaseItemRes<bool> AddUser(AddUserReq req)
         //{
-
+        //    //var res = this._userBLL.AddUser(req, )
         //}
 
 

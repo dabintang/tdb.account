@@ -6,5 +6,9 @@
   "ErrUserCodeOrPassword": {
     "MsgID": "Acc_0002",
     "Msg": "登录名或密码不对"
+  },
+  "DisableUser": {
+    "MsgID": "Acc_0003",
+    "Msg": "用户已禁用"
   }
 }
