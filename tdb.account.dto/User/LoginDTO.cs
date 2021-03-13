@@ -1,0 +1,25 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using tdb.framework.webapi.Validation.Attributes;
+
+namespace tdb.account.dto.User
+{
+    /// <summary>
+    /// 登录
+    /// </summary>
+    public class LoginReq
+    {
+        /// <summary>
+        /// 登录名
+        /// </summary>
+        [TdbRequired(ParamName = "登录名")]
+        public string UserCode { get; set; }
+
+        /// <summary>
+        /// 密码
+        /// </summary>
+        [TdbRequired(ParamName = "密码")]
+        public string Password { get; set; }
+    }
+}

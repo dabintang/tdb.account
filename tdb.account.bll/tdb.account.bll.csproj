@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\tdb.account.common\tdb.account.common.csproj" />
+    <ProjectReference Include="..\tdb.account.ibll\tdb.account.ibll.csproj" />
+    <ProjectReference Include="..\tdb.account.idal\tdb.account.idal.csproj" />
+  </ItemGroup>
+
+</Project>

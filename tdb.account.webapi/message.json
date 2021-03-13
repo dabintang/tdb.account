@@ -1,0 +1,10 @@
+﻿{
+  "ExistUserCode": {
+    "MsgID": "Acc_0001",
+    "Msg": "登录名已存在"
+  },
+  "ErrUserCodeOrPassword": {
+    "MsgID": "Acc_0002",
+    "Msg": "登录名或密码不对"
+  }
+}

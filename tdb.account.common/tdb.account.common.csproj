@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="tdb.common" Version="2.1.0.6" />
+    <PackageReference Include="tdb.framework.webapi" Version="2.1.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="JWT\" />
+  </ItemGroup>
+
+</Project>
