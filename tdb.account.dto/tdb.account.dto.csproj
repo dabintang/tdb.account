@@ -8,4 +8,8 @@
     <ProjectReference Include="..\tdb.account.common\tdb.account.common.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
 </Project>

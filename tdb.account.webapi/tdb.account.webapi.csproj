@@ -9,14 +9,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Filter\**" />
+    <Content Remove="Filter\**" />
+    <EmbeddedResource Remove="Filter\**" />
+    <None Remove="Filter\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\tdb.account.bll\tdb.account.bll.csproj" />
     <ProjectReference Include="..\tdb.account.common\tdb.account.common.csproj" />
     <ProjectReference Include="..\tdb.account.dal\tdb.account.dal.csproj" />
     <ProjectReference Include="..\tdb.account.dto\tdb.account.dto.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Filter\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using tdb.account.common.Config;
-using tdb.account.dal;
+using tdb.account.common.Const;
 using tdb.account.ibll;
 using tdb.framework.webapi.Config;
 using tdb.framework.webapi.DTO;
@@ -21,17 +21,17 @@ namespace tdb.account.webapi.Controllers
     public class ManageToolsController : BaseController
     {
         /// <summary>
-        /// 初始化
+        /// 管理工具
         /// </summary>
-        private readonly IInitBLL _initBLL;
+        private readonly IManageTools _manageTolls;
 
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="initBLL">初始化</param>
-        public ManageToolsController(IInitBLL initBLL)
+        /// <param name="manageTolls">管理工具</param>
+        public ManageToolsController(IManageTools manageTolls)
         {
-            this._initBLL = initBLL;
+            this._manageTolls = manageTolls;
         }
 
         #region 接口
@@ -42,33 +42,23 @@ namespace tdb.account.webapi.Controllers
         /// <param name="file">配置文件（.json文件）</param>
         /// <returns>还原结果</returns>
         [HttpPost]
-        [AllowAnonymous]
-        public BaseItemRes<string> RestoreConfig(IFormFile file)
+        [Authorize(Roles = CstRole.SuperAdmin)]
+        public BaseItemRes<string> RestoreConsulConfig(IFormFile file)
         {
-            using (var ms = file.OpenReadStream())
-            {
-                var buf = new byte[ms.Length];
-                ms.Read(buf, 0, (int)ms.Length);
-
-                var jsonTxt = Encoding.Default.GetString(buf);
-                var config = JsonConvert.DeserializeObject<ConsulConfig>(jsonTxt);
-
-                DistributedConfigurator.Ins.RestoreConfig<ConsulConfig>(config);
-                return BaseItemRes<string>.Ok("还原完成");
-            }
+            this._manageTolls.RestoreConsulConfig(file);
+            return BaseItemRes<string>.Ok("还原完成");
         }
 
         /// <summary>
-        /// 备份配置
+        /// 备份consul配置
         /// </summary>
-        /// <param name="req">条件</param>
         /// <returns>备份配置完整文件名</returns>
         [HttpPost]
-        [AllowAnonymous]
-        public BaseItemRes<string> BackupConfig()
+        [Authorize(Roles = CstRole.SuperAdmin)]
+        public BaseItemRes<string> BackupConsulConfig()
         {
-            var data = DistributedConfigurator.Ins.BackupConfig<ConsulConfig>();
-            return BaseItemRes<string>.Ok(data);
+            var fullFileName = this._manageTolls.BackupConsulConfig();
+            return BaseItemRes<string>.Ok(fullFileName);
         }
 
         /// <summary>
@@ -79,34 +69,33 @@ namespace tdb.account.webapi.Controllers
         [AllowAnonymous]
         public BaseItemRes<string> CreateDBModels()
         {
-            // 连接数据库
-            var db = new DBContext().DB;
-
-            //表映射
-            db.MappingTables.Add("LoginLog", "login_log");
-            db.MappingTables.Add("User", "user");
-
-            // 生成路径
-            var classDirectory = @"..\..\..\..\tdb.account.model";
-            // 实体命名空间
-            string classNamespace = "tdb.account.model";
-            // 生成实体类
-            db.DbFirst.IsCreateAttribute().CreateClassFile(classDirectory, classNamespace);
-
+            this._manageTolls.CreateDBModels();
             return BaseItemRes<string>.Ok("实体类已生成");
         }
 
         /// <summary>
-        /// 初始化数据库等
+        /// 初始化数据库
         /// </summary>
         /// <returns></returns>
         [HttpPost]
         [AllowAnonymous]
-        public BaseItemRes<string> Init()
+        public BaseItemRes<string> InitDB()
         {
-            this._initBLL.Init();
+            var result = this._manageTolls.InitDB();
+            var data = result ? "初始化数据库完成" : "初始化数据库失败";
+            return BaseItemRes<string>.Ok(data);
+        }
 
-            return BaseItemRes<string>.Ok("初始化完成");
+        /// <summary>
+        /// 测试
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [AllowAnonymous]
+        public BaseItemRes<bool> Test()
+        {
+            this._manageTolls.Test();
+            return BaseItemRes<bool>.Ok(true);
         }
 
         #endregion

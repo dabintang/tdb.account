@@ -53,9 +53,19 @@ namespace tdb.account.common.Config
         public class TokenConfig
         {
             /// <summary>
-            /// 秘钥
+            /// 发行者
             /// </summary>
-            public string Secret { get; set; }
+            public string Issuer { get; set; }
+
+            /// <summary>
+            /// 接收者
+            /// </summary>
+            public string Audience { get; set; }
+
+            /// <summary>
+            /// 秘钥（至少16位）
+            /// </summary>
+            public string SecretKey { get; set; }
 
             /// <summary>
             /// 超时时间（秒）

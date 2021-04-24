@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\tdb.account.common\tdb.account.common.csproj" />
     <ProjectReference Include="..\tdb.account.dto\tdb.account.dto.csproj" />
+    <ProjectReference Include="..\tdb.account.model\tdb.account.model.csproj" />
   </ItemGroup>
 
 </Project>

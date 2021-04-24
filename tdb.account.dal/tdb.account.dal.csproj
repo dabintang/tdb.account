@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SqlSugarCore" Version="5.0.2.6" />
+    <PackageReference Include="SqlSugar.IOC" Version="1.5.0" />
+    <PackageReference Include="SqlSugarCore" Version="5.0.2.8" />
   </ItemGroup>
 
   <ItemGroup>

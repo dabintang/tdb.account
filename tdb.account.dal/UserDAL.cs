@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SqlSugar.IOC;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using tdb.account.idal;
@@ -9,7 +10,7 @@ namespace tdb.account.dal
     /// <summary>
     /// 用户
     /// </summary>
-    public class UserDAL : DBContext, IUserDAL
+    public class UserDAL : Repository<User>, IUserDAL
     {
         #region 实现接口
 
@@ -19,7 +20,7 @@ namespace tdb.account.dal
         /// <param name="user">用户信息</param>
         public void AddUser(User user)
         {
-            this.DB.Insertable(user).ExecuteCommand();
+            this.AsInsertable(user).ExecuteCommand();
         }
 
         /// <summary>
@@ -29,7 +30,7 @@ namespace tdb.account.dal
         /// <returns>true：已存在；false：不存在</returns>
         public bool ExistUser(string userCode)
         {
-            var count = this.DB.Queryable<User>().Count(m => m.UserCode == userCode);
+            var count = this.AsQueryable().Count(m => m.UserCode == userCode);
             return count > 0;
         }
 
@@ -40,8 +41,7 @@ namespace tdb.account.dal
         /// <returns>用户信息</returns>
         public User GetUser(string userCode)
         {
-            var user = this.DB.Queryable<User>().Where(m => m.UserCode == userCode).First();
-            return user;
+            return this.GetSingle(m => m.UserCode == userCode);
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace tdb.account.dal
         /// <param name="user">用户信息</param>
         public void UpdateUser(User user)
         {
-            this.DB.Updateable(user).ExecuteCommand();
+            this.AsUpdateable(user).ExecuteCommand();
         }
 
         #endregion

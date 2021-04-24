@@ -9,7 +9,7 @@ namespace tdb.account.idal
     /// <summary>
     /// 用户
     /// </summary>
-    public interface IUserDAL : IAutofacDependency
+    public interface IUserDAL : IBaseDAL
     {
         /// <summary>
         /// 添加用户

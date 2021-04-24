@@ -5,12 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="tdb.common" Version="2.1.0.6" />
-    <PackageReference Include="tdb.framework.webapi" Version="2.1.0.10" />
+    <Compile Remove="JWT\**" />
+    <EmbeddedResource Remove="JWT\**" />
+    <None Remove="JWT\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="JWT\" />
+    <PackageReference Include="tdb.common" Version="2.1.0.6" />
+    <PackageReference Include="tdb.framework.webapi" Version="2.1.0.11" />
   </ItemGroup>
 
 </Project>

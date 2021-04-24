@@ -1,18 +1,22 @@
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using SqlSugar.IOC;
 using Swashbuckle.AspNetCore.SwaggerUI;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using tdb.account.common.Config;
-using tdb.account.ibll;
-using tdb.framework.webapi.Auth;
 using tdb.framework.webapi.Cache;
 using tdb.framework.webapi.Exceptions;
 using tdb.framework.webapi.Log;
@@ -21,16 +25,29 @@ using tdb.framework.webapi.Validation;
 
 namespace tdb.account.webapi
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="configuration"></param>
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
+        /// <summary>
+        /// 配置
+        /// </summary>
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
             //配置
@@ -42,15 +59,77 @@ namespace tdb.account.webapi
             //日志
             services.AddTdbMySqlNLogger(AccConfig.Consul.DBLogConnStr, $"{AccConfig.App.Consul.ServiceCode}_{AccConfig.App.ApiUrl}");
 
-            //JWT
-            services.AddTdbAuth();
-
             //参数验证
             services.AddTdbParamValidate();
 
-            services.AddControllers(option => {
+            services.AddControllers(option =>
+            {
                 //异常处理
                 option.AddTdbGlobalException();
+            });
+
+            //认证授权
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(o =>
+            {
+                o.TokenValidationParameters = new TokenValidationParameters
+                {
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(AccConfig.Consul.Token.SecretKey)),
+                    //不验Audience
+                    ValidateAudience = false,
+                    //不验Issuer
+                    ValidateIssuer = false,
+                    //允许的服务器时间偏移量
+                    ClockSkew = TimeSpan.Zero,
+                };
+                o.Events = new JwtBearerEvents()
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        Logger.Ins.Fatal(context.Exception, "认证授权异常");
+                        return Task.CompletedTask;
+                    },
+                    OnForbidden = context =>
+                    {
+                        context.Response.Clear();
+                        context.Response.ContentType = "application/json";
+                        context.Response.StatusCode = 403;
+                        context.Response.WriteAsync("权限不足");
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.Clear();
+                        context.Response.ContentType = "application/json";
+                        context.Response.StatusCode = 401;
+                        context.Response.WriteAsync("认证未通过");
+                        return Task.CompletedTask;
+                    }
+                };
+            });
+
+            //SqlSugar.IOC
+            services.AddSqlSugar(new IocConfig()
+            {
+                ConnectionString = AccConfig.Consul.DBConnStr,
+                DbType = IocDbType.MySql,
+                IsAutoCloseConnection = true    //开启自动释放模式
+            });
+            //SqlSugar AOP日志
+            services.ConfigurationSugar(db =>
+            {
+                if (Logger.Ins.IsTraceEnabled)
+                {
+                    db.Aop.OnLogExecuting = (sql, pars) =>
+                    {
+                        Logger.Ins.Trace($"执行SQL：{sql}{Environment.NewLine}{db.Utilities.SerializeObject(pars.ToDictionary(it => it.ParameterName, it => it.Value))}");
+                    };
+                }
             });
 
             //swagger
@@ -68,13 +147,37 @@ namespace tdb.account.webapi
                 c.IncludeXmlComments(xmlAPI, true);
 
                 //参数注释
+                var xmlDTO = Path.Combine(AppContext.BaseDirectory, "tdb.account.dto.xml");
+                c.IncludeXmlComments(xmlDTO, true);
 
-                //生成token输入框
-                c.OperationFilter<SwaggerTokenFilter>();
+                //添加Authorization
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme.",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Scheme = "bearer",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                        },
+                        new List<string>()
+                    }
+                });
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -84,6 +187,9 @@ namespace tdb.account.webapi
 
             app.UseRouting();
 
+            //认证
+            app.UseAuthentication();
+            //授权
             app.UseAuthorization();
 
             //swagger
@@ -100,44 +206,14 @@ namespace tdb.account.webapi
             });
         }
 
+        /// <summary>
+        /// autofac容器注册服务
+        /// </summary>
+        /// <param name="builder"></param>
         public void ConfigureContainer(ContainerBuilder builder)
         {
             //新模块组件注册    
             builder.RegisterModule<AutofacModuleRegister>();
-
-            ////所有要实现依赖注入的借口都要继承该接口
-            //var baseType = typeof(common.IAutofacDependency);
-
-            ////获取需要注册的程序集名称集合
-            //var lstAssemblyName = this.GetRegisterAssemblyNames();
-
-            //foreach (var assemblyName in lstAssemblyName)
-            //{
-            //    //注册程序集中的对象
-            //    builder.RegisterAssemblyTypes(GetAssemblyByName(assemblyName)).Where(m => baseType.IsAssignableFrom(m) && m != baseType)
-            //           .AsImplementedInterfaces()//表示注册的类型，以接口的方式注册
-            //                                     //.EnableInterfaceInterceptors()//引用Autofac.Extras.DynamicProxy,使用接口的拦截器，在使用特性 [Attribute] 注册时，注册拦截器可注册到接口(Interface)上或其实现类(Implement)上。使用注册到接口上方式，所有的实现类都能应用到拦截器。
-            //           .InstancePerLifetimeScope();//同一个Lifetime生成的对象是同一个实例
-            //}
-        }
-
-        /// <summary>
-        /// 根据程序集名称获取程序集
-        /// </summary>
-        /// <param name="assemblyName">程序集名称</param>
-        /// <returns></returns>
-        private System.Reflection.Assembly GetAssemblyByName(string assemblyName)
-        {
-            return System.Reflection.Assembly.Load(assemblyName);
-        }
-
-        /// <summary>
-        /// 获取需要注册的程序集名称集合
-        /// </summary>
-        /// <returns></returns>
-        protected virtual List<string> GetRegisterAssemblyNames()
-        {
-            return new List<string>() { "tdb.account.dal", "tdb.account.bll" };
         }
     }
 }

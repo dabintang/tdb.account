@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.10.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\tdb.account.common\tdb.account.common.csproj" />
     <ProjectReference Include="..\tdb.account.ibll\tdb.account.ibll.csproj" />
     <ProjectReference Include="..\tdb.account.idal\tdb.account.idal.csproj" />

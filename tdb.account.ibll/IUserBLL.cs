@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using tdb.account.dto.Common;
 using tdb.account.dto.User;
+using tdb.account.model;
 using tdb.framework.webapi.DTO;
 using tdb.framework.webapi.IocAutofac;
 
@@ -17,7 +18,7 @@ namespace tdb.account.ibll
         /// 登录
         /// </summary>
         /// <param name="req">条件</param>
-        /// <returns>token</returns>
+        /// <returns>toekn</returns>
         BaseItemRes<string> Login(LoginReq req);
 
         /// <summary>

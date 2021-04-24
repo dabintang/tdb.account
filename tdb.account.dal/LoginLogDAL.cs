@@ -10,7 +10,7 @@ namespace tdb.account.dal
     /// <summary>
     ///  登录日志
     /// </summary>
-    public class LoginLogDAL : DBContext, ILoginLogDAL
+    public class LoginLogDAL : Repository<LoginLog>, ILoginLogDAL
     {
         #region 实现接口
 
@@ -21,7 +21,7 @@ namespace tdb.account.dal
         /// <returns>主键ID</returns>
         public async Task<long> AddLoginLogAsync(LoginLog log)
         {
-            var id = await this.DB.Insertable(log).ExecuteReturnBigIdentityAsync();
+            var id = await this.AsInsertable(log).ExecuteReturnBigIdentityAsync();
             return id;
         }
 

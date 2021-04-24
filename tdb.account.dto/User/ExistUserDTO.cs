@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using tdb.framework.webapi.Validation.Attributes;
 
 namespace tdb.account.dto.User
 {
@@ -11,7 +12,9 @@ namespace tdb.account.dto.User
     {
         /// <summary>
         /// 登录名
-        /// </summary>           
+        /// </summary>
+        [TdbRequired(ParamName = "登录名")]
+
         public string UserCode { get; set; }
     }
 }

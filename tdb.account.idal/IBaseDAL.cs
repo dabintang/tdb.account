@@ -1,18 +1,19 @@
-﻿using System;
+﻿using SqlSugar;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using tdb.framework.webapi.IocAutofac;
 
-namespace tdb.account.ibll
+namespace tdb.account.idal
 {
     /// <summary>
-    /// 初始化
+    /// 基接口
     /// </summary>
-    public interface IInitBLL : IAutofacDependency
+    public interface IBaseDAL : IAutofacDependency
     {
         /// <summary>
-        /// 初始化
+        /// 多租户上下文
         /// </summary>
-        void Init();
+        ITenant AsTenant();
     }
 }

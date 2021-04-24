@@ -10,7 +10,7 @@ namespace tdb.account.idal
     /// <summary>
     /// 登录日志
     /// </summary>
-    public interface ILoginLogDAL : IAutofacDependency
+    public interface ILoginLogDAL : IBaseDAL
     {
         /// <summary>
         /// 添加登录日志（异步）

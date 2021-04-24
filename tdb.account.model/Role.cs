@@ -6,64 +6,29 @@ using SqlSugar;
 namespace tdb.account.model
 {
     ///<summary>
-    ///用户
+    ///角色表
     ///</summary>
-    [SugarTable("user")]
-    public partial class User
+    [SugarTable("role")]
+    public partial class Role
     {
-           public User(){
+           public Role(){
 
 
            }
            /// <summary>
-           /// Desc:用户编码/登录名
+           /// Desc:角色编码
            /// Default:
            /// Nullable:False
            /// </summary>           
            [SugarColumn(IsPrimaryKey=true)]
-           public string UserCode {get;set;}
+           public string RoleCode {get;set;}
 
            /// <summary>
-           /// Desc:用户名
+           /// Desc:角色名称
            /// Default:
            /// Nullable:False
            /// </summary>           
-           public string UserName {get;set;}
-
-           /// <summary>
-           /// Desc:密码(MD5)
-           /// Default:
-           /// Nullable:False
-           /// </summary>           
-           public string Password {get;set;}
-
-           /// <summary>
-           /// Desc:性别（0：未知；1：男；2：女）
-           /// Default:0
-           /// Nullable:False
-           /// </summary>           
-           public int Gender {get;set;}
-
-           /// <summary>
-           /// Desc:生日
-           /// Default:
-           /// Nullable:True
-           /// </summary>           
-           public DateTime? Birthday {get;set;}
-
-           /// <summary>
-           /// Desc:手机号码
-           /// Default:
-           /// Nullable:False
-           /// </summary>           
-           public string MobilePhone {get;set;}
-
-           /// <summary>
-           /// Desc:电子邮箱
-           /// Default:
-           /// Nullable:False
-           /// </summary>           
-           public string Email {get;set;}
+           public string RoleName {get;set;}
 
            /// <summary>
            /// Desc:是否启用

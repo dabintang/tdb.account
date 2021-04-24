@@ -21,5 +21,10 @@ namespace tdb.account.dto.User
         /// </summary>
         [TdbRequired(ParamName = "密码")]
         public string Password { get; set; }
+
+        /// <summary>
+        /// 服务编码
+        /// </summary>           
+        public string ServiceCode { get; set; }
     }
 }

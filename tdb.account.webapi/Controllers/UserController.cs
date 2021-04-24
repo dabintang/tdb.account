@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using tdb.account.common.Const;
 using tdb.account.dto.User;
 using tdb.account.ibll;
 using tdb.framework.webapi.DTO;
@@ -45,18 +46,18 @@ namespace tdb.account.webapi.Controllers
             return res;
         }
 
-        ///// <summary>
-        ///// 添加用户
-        ///// </summary>
-        ///// <param name="req">用户信息</param>
-        //[HttpPost]
-        //public BaseItemRes<bool> AddUser(AddUserReq req)
-        //{
-        //    //var res = this._userBLL.AddUser(req, )
-        //}
-
-
+        /// <summary>
+        /// 添加用户
+        /// </summary>
+        /// <param name="req">用户信息</param>
+        [HttpPost]
+        [Authorize(Roles = CstRole.SuperAdmin)]
+        public BaseItemRes<bool> AddUser([FromBody] AddUserReq req)
+        {
+            return this._userBLL.AddUser(req, this.CurUser);
+        }
 
         #endregion
+
     }
 }
