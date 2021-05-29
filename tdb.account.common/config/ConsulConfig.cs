@@ -29,10 +29,16 @@ namespace tdb.account.common.Config
         public RedisConfig Redis { get; set; }
 
         /// <summary>
-        /// redis配置
+        /// 认证相关配置
         /// </summary>
         [ConsulConfig("Token")]
         public TokenConfig Token { get; set; }
+
+        /// <summary>
+        /// 默认密码
+        /// </summary>
+        [ConsulConfig("DefaultPassword")]
+        public string DefaultPassword { get; set; }
 
         #region 内部类
 
@@ -48,7 +54,7 @@ namespace tdb.account.common.Config
         }
 
         /// <summary>
-        /// token相关配置
+        /// 认证相关配置
         /// </summary>
         public class TokenConfig
         {

@@ -12,17 +12,32 @@ namespace tdb.account.common.Config
         /// <summary>
         /// 登录名已存在
         /// </summary>
-        public MsgInfo ExistUserCode { get; set; }
+        public MsgInfo ExistLoginName { get; set; }
 
         /// <summary>
         /// 登录名或密码不对
         /// </summary>
-        public MsgInfo ErrUserCodeOrPassword { get; set; }
+        public MsgInfo ErrLoginNameOrPassword { get; set; }
 
         /// <summary>
         /// 用户已禁用
         /// </summary>
         public MsgInfo DisableUser { get; set; }
+
+        /// <summary>
+        /// 用户不存在
+        /// </summary>
+        public MsgInfo UserNotExist { get; set; }
+
+        /// <summary>
+        /// 角色编码已存在
+        /// </summary>
+        public MsgInfo ExistRoleCode { get; set; }
+
+        /// <summary>
+        /// 角色不存在
+        /// </summary>
+        public MsgInfo RoleNotExist { get; set; }
     }
 
     /// <summary>

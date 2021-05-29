@@ -4,12 +4,13 @@
     <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\tdb.account.common\tdb.account.common.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\tdb.account.common\tdb.account.common.csproj" />
+    <ProjectReference Include="..\tdb.account.model\tdb.account.model.csproj" />
+  </ItemGroup>
 
 </Project>

@@ -16,22 +16,6 @@ namespace tdb.account.model
 
            }
            /// <summary>
-           /// Desc:用户编码/登录名
-           /// Default:
-           /// Nullable:False
-           /// </summary>           
-           [SugarColumn(IsPrimaryKey=true)]
-           public string UserCode {get;set;}
-
-           /// <summary>
-           /// Desc:角色编码
-           /// Default:
-           /// Nullable:False
-           /// </summary>           
-           [SugarColumn(IsPrimaryKey=true)]
-           public string RoleCode {get;set;}
-
-           /// <summary>
            /// Desc:创建者
            /// Default:
            /// Nullable:False
@@ -44,6 +28,22 @@ namespace tdb.account.model
            /// Nullable:False
            /// </summary>           
            public DateTime CreateTime {get;set;}
+
+           /// <summary>
+           /// Desc:登录名
+           /// Default:
+           /// Nullable:False
+           /// </summary>           
+           [SugarColumn(IsPrimaryKey=true)]
+           public string LoginName {get;set;}
+
+           /// <summary>
+           /// Desc:角色编码
+           /// Default:
+           /// Nullable:False
+           /// </summary>           
+           [SugarColumn(IsPrimaryKey=true)]
+           public string RoleCode {get;set;}
 
     }
 }

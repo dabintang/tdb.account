@@ -16,6 +16,13 @@ namespace tdb.account.model
 
            }
            /// <summary>
+           /// Desc:创建时间
+           /// Default:
+           /// Nullable:False
+           /// </summary>           
+           public DateTime CreateTime {get;set;}
+
+           /// <summary>
            /// Desc:自增ID
            /// Default:
            /// Nullable:False
@@ -24,11 +31,11 @@ namespace tdb.account.model
            public long ID {get;set;}
 
            /// <summary>
-           /// Desc:用户编码/登录名
+           /// Desc:登录名
            /// Default:
            /// Nullable:False
            /// </summary>           
-           public string UserCode {get;set;}
+           public string LoginName {get;set;}
 
            /// <summary>
            /// Desc:服务编码
@@ -43,13 +50,6 @@ namespace tdb.account.model
            /// Nullable:False
            /// </summary>           
            public string Token {get;set;}
-
-           /// <summary>
-           /// Desc:创建时间
-           /// Default:
-           /// Nullable:False
-           /// </summary>           
-           public DateTime CreateTime {get;set;}
 
     }
 }

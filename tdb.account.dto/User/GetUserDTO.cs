@@ -15,6 +15,6 @@ namespace tdb.account.dto.User
         /// </summary>
         [TdbRequired(ParamName = "登录名")]
 
-        public string UserCode { get; set; }
+        public string LoginName { get; set; }
     }
 }

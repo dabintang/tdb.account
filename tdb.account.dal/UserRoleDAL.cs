@@ -1,8 +1,12 @@
-﻿using System;
+﻿using Autofac.Extras.DynamicProxy;
+using SqlSugar.IOC;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using tdb.account.common.Const;
 using tdb.account.idal;
 using tdb.account.model;
+using tdb.framework.webapi.IocAutofac.CacheAOP;
 using tdb.framework.webapi.Log;
 
 namespace tdb.account.dal
@@ -10,6 +14,7 @@ namespace tdb.account.dal
     /// <summary>
     /// 用户角色
     /// </summary>
+    [Intercept(typeof(TdbCacheInterceptor))]
     public class UserRoleDAL : Repository<UserRole>, IUserRoleDAL
     {
         #region 实现接口
@@ -17,9 +22,11 @@ namespace tdb.account.dal
         /// <summary>
         /// 设置用户角色
         /// </summary>
-        /// <param name="userCode">用户编码</param>
+        /// <param name="loginName">登录名</param>
         /// <param name="lstUserRole">用户角色</param>
-        public bool SetUserRole(string userCode, List<UserRole> lstUserRole)
+        [TdbRemoveCacheHash(CstCache.UserRole)]
+        [TdbCacheKey(0)]
+        public bool SetUserRole(string loginName, List<UserRole> lstUserRole)
         {
             try
             {
@@ -27,7 +34,7 @@ namespace tdb.account.dal
                 this.AsTenant().BeginTran();
 
                 //先删除原角色
-                this.AsDeleteable().Where(m => m.UserCode == userCode).ExecuteCommand();
+                this.AsDeleteable().Where(m => m.LoginName == loginName).ExecuteCommand();
 
                 //插入新角色
                 if (lstUserRole != null && lstUserRole.Count > 0)
@@ -54,11 +61,17 @@ namespace tdb.account.dal
         /// <summary>
         /// 查询指定用户的用户角色
         /// </summary>
-        /// <param name="userCode">用户编码</param>
+        /// <param name="loginName">登录名</param>
         /// <returns>用户角色</returns>
-        public List<UserRole> QueryUserRole(string userCode)
+        [TdbReadCacheHash(CstCache.UserRole)]
+        [TdbCacheKey(0)]
+        public List<UserRole> QueryUserRole(string loginName)
         {
-            return this.AsQueryable().Where(m => m.UserCode == userCode).ToList();
+            var list = DbScoped.Sugar.Queryable<UserRole, Role>((ur, r) => ur.RoleCode == r.RoleCode)
+                                     .Where((ur, r) => ur.LoginName == loginName && r.Enable == true)
+                                     .Select((ur, r) => ur)
+                                     .ToList();
+            return list;
         }
 
         #endregion

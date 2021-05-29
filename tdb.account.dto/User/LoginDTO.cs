@@ -14,7 +14,7 @@ namespace tdb.account.dto.User
         /// 登录名
         /// </summary>
         [TdbRequired(ParamName = "登录名")]
-        public string UserCode { get; set; }
+        public string LoginName { get; set; }
 
         /// <summary>
         /// 密码
@@ -24,7 +24,8 @@ namespace tdb.account.dto.User
 
         /// <summary>
         /// 服务编码
-        /// </summary>           
+        /// </summary>
+        [TdbNotNull(ParamName = "服务编码")]
         public string ServiceCode { get; set; }
     }
 }

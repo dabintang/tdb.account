@@ -1,14 +1,26 @@
 ﻿{
-  "ExistUserCode": {
+  "ExistLoginName": {
     "MsgID": "Acc_0001",
     "Msg": "登录名已存在"
   },
-  "ErrUserCodeOrPassword": {
+  "ErrLoginNameOrPassword": {
     "MsgID": "Acc_0002",
     "Msg": "登录名或密码不对"
   },
   "DisableUser": {
     "MsgID": "Acc_0003",
     "Msg": "用户已禁用"
+  },
+  "UserNotExist": {
+    "MsgID": "Acc_0004",
+    "Msg": "用户不存在"
+  },
+  "ExistRoleCode": {
+    "MsgID": "Acc_0005",
+    "Msg": "角色编码已存在"
+  },
+  "RoleNotExist": {
+    "MsgID": "Acc_0006",
+    "Msg": "角色不存在"
   }
 }

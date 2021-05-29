@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using tdb.account.common.Config;
 using tdb.account.common.Const;
+using tdb.account.dal;
+using tdb.account.dto.Common;
 using tdb.account.ibll;
 using tdb.framework.webapi.Config;
 using tdb.framework.webapi.DTO;
@@ -23,15 +25,15 @@ namespace tdb.account.webapi.Controllers
         /// <summary>
         /// 管理工具
         /// </summary>
-        private readonly IManageTools _manageTolls;
+        private readonly IManageTools manageTolls;
 
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="manageTolls">管理工具</param>
-        public ManageToolsController(IManageTools manageTolls)
+        /// <param name="_manageTolls">管理工具</param>
+        public ManageToolsController(IManageTools _manageTolls)
         {
-            this._manageTolls = manageTolls;
+            this.manageTolls = _manageTolls;
         }
 
         #region 接口
@@ -45,7 +47,7 @@ namespace tdb.account.webapi.Controllers
         [Authorize(Roles = CstRole.SuperAdmin)]
         public BaseItemRes<string> RestoreConsulConfig(IFormFile file)
         {
-            this._manageTolls.RestoreConsulConfig(file);
+            this.manageTolls.RestoreConsulConfig(file);
             return BaseItemRes<string>.Ok("还原完成");
         }
 
@@ -57,7 +59,7 @@ namespace tdb.account.webapi.Controllers
         [Authorize(Roles = CstRole.SuperAdmin)]
         public BaseItemRes<string> BackupConsulConfig()
         {
-            var fullFileName = this._manageTolls.BackupConsulConfig();
+            var fullFileName = this.manageTolls.BackupConsulConfig();
             return BaseItemRes<string>.Ok(fullFileName);
         }
 
@@ -69,7 +71,7 @@ namespace tdb.account.webapi.Controllers
         [AllowAnonymous]
         public BaseItemRes<string> CreateDBModels()
         {
-            this._manageTolls.CreateDBModels();
+            this.manageTolls.CreateDBModels();
             return BaseItemRes<string>.Ok("实体类已生成");
         }
 
@@ -81,7 +83,7 @@ namespace tdb.account.webapi.Controllers
         [AllowAnonymous]
         public BaseItemRes<string> InitDB()
         {
-            var result = this._manageTolls.InitDB();
+            var result = this.manageTolls.InitDB();
             var data = result ? "初始化数据库完成" : "初始化数据库失败";
             return BaseItemRes<string>.Ok(data);
         }
@@ -92,10 +94,33 @@ namespace tdb.account.webapi.Controllers
         /// <returns></returns>
         [HttpPost]
         [AllowAnonymous]
-        public BaseItemRes<bool> Test()
+        public BaseItemRes<InitDataInfo> Test()
         {
-            this._manageTolls.Test();
-            return BaseItemRes<bool>.Ok(true);
+            var userDAL = new UserDAL();
+            var lstUser = userDAL.AsQueryable().ToList();
+
+            var roleDAL = new RoleDAL();
+            var lstRole = roleDAL.AsQueryable().ToList();
+
+            var authorityDAL = new AuthorityDAL();
+            var lstAuthority = authorityDAL.AsQueryable().ToList();
+
+            var roleAuthorityDAL = new RoleAuthorityDAL();
+            var lstRoleAuthority = roleAuthorityDAL.AsQueryable().ToList();
+
+            var userRoleDAL = new UserRoleDAL();
+            var lstUserRole = userRoleDAL.AsQueryable().ToList();
+
+            var initData = new InitDataInfo()
+            {
+                Users = lstUser,
+                Roles = lstRole,
+                Authoritys = lstAuthority,
+                RoleAuthoritys = lstRoleAuthority,
+                UserRoles = lstUserRole
+            };
+
+            return BaseItemRes<InitDataInfo>.Ok(initData);
         }
 
         #endregion

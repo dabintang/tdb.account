@@ -1,0 +1,62 @@
+﻿{
+  "Users": [
+    {
+      "Birthday": null,
+      "Creater": "0",
+      "CreateTime": "2021-04-27",
+      "Email": "",
+      "Enable": true,
+      "Gender": 0,
+      "LoginName": "SuperAdmin",
+      "MobilePhone": "",
+      "Password": "abc123",
+      "Updater": "0",
+      "UpdateTime": "2021-04-27",
+      "UserName": "超级管理员"
+    }
+  ],
+  "Roles": [
+    {
+      "Enable": true,
+      "Remark": "",
+      "RoleCode": "SuperAdmin",
+      "RoleName": "超级管理员"
+    },
+    {
+      "Enable": true,
+      "Remark": "",
+      "RoleCode": "PwdMgrAdmin",
+      "RoleName": "密码管理系统管理员"
+    }
+  ],
+  "Authoritys": [
+    {
+      "AuthorityCode": "ManageUser",
+      "AuthorityName": "管理用户",
+      "Enable": true,
+      "Remark": "增删查改用户的权限"
+    }
+  ],
+  "RoleAuthoritys": [
+    {
+      "AuthorityCode": "ManageUser",
+      "Creater": "0",
+      "CreateTime": "2021-04-27",
+      "RoleCode": "SuperAdmin"
+    },
+    {
+      "AuthorityCode": "ManageUser",
+      "Creater": "0",
+      "CreateTime": "2021-04-27",
+      "RoleCode": "PwdMgrAdmin"
+    }
+  ],
+  "UserRoles": [
+    {
+      "Creater": "0",
+      "CreateTime": "2021-04-27",
+      "LoginName": "SuperAdmin",
+      "RoleCode": "SuperAdmin"
+    }
+  ]
+}

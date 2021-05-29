@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="tdb.common" Version="2.1.0.6" />
-    <PackageReference Include="tdb.framework.webapi" Version="2.1.0.11" />
+    <PackageReference Include="tdb.framework.webapi" Version="2.1.0.18" />
   </ItemGroup>
 
 </Project>

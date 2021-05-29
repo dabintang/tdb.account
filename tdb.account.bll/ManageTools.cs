@@ -4,9 +4,12 @@ using Newtonsoft.Json;
 using SqlSugar;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 using tdb.account.common.Config;
 using tdb.account.common.Const;
+using tdb.account.dto.Common;
 using tdb.account.dto.Enums;
 using tdb.account.ibll;
 using tdb.account.idal;
@@ -25,48 +28,70 @@ namespace tdb.account.bll
         /// <summary>
         /// Autofac上下文
         /// </summary>
-        private IComponentContext _componentContext;
+        private IComponentContext componentContext;
 
         /// <summary>
         /// 用户
         /// </summary>
-        private IUserDAL _userDAL
+        private IUserDAL userDAL
         {
             get
             {
-                return this._componentContext.Resolve<IUserDAL>();
+                return this.componentContext.Resolve<IUserDAL>();
             }
         }
 
         /// <summary>
         /// 角色
         /// </summary>
-        private IRoleDAL _roleDAL
+        private IRoleDAL roleDAL
         {
             get
             {
-                return this._componentContext.Resolve<IRoleDAL>();
+                return this.componentContext.Resolve<IRoleDAL>();
             }
         }
 
         /// <summary>
         /// 用户角色
         /// </summary>
-        private IUserRoleDAL _userRoleDAL
+        private IUserRoleDAL userRoleDAL
         {
             get
             {
-                return this._componentContext.Resolve<IUserRoleDAL>();
+                return this.componentContext.Resolve<IUserRoleDAL>();
+            }
+        }
+
+        /// <summary>
+        /// 权限
+        /// </summary>
+        private IAuthorityDAL authorityDAL
+        {
+            get
+            {
+                return this.componentContext.Resolve<IAuthorityDAL>();
+            }
+        }
+
+        /// <summary>
+        /// 角色权限
+        /// </summary>
+        private IRoleAuthorityDAL roleAuthorityDAL
+        {
+            get
+            {
+                return this.componentContext.Resolve<IRoleAuthorityDAL>();
             }
         }
 
         /// <summary>
         /// 构造函数
         /// </summary>
-        /// <param name="componentContext">Autofac上下文</param>
-        public ManageTools(IComponentContext componentContext)
+        /// <param name="_componentContext">Autofac上下文</param>
+        public ManageTools(IComponentContext _componentContext)
         {
-            this._componentContext = componentContext;
+            this.componentContext = _componentContext;
         }
 
         #region 实现接口
@@ -117,6 +142,8 @@ namespace tdb.account.bll
             db.MappingTables.Add("LoginLog", "login_log");
             db.MappingTables.Add("User", "user");
             db.MappingTables.Add("Role", "role");
+            db.MappingTables.Add("Authority", "authority");
+            db.MappingTables.Add("RoleAuthority", "role_authority");
             db.MappingTables.Add("UserRole", "user_role");
 
             // 生成路径
@@ -127,6 +154,110 @@ namespace tdb.account.bll
             db.DbFirst.IsCreateAttribute().CreateClassFile(classDirectory, classNamespace);
         }
 
+        ///// <summary>
+        ///// 初始化数据库
+        ///// </summary>
+        ///// <returns>是否成功</returns>
+        //public bool InitDB()
+        //{
+        //    try
+        //    {
+        //        //开始事物
+        //        this.userDAL.AsTenant().BeginTran();
+
+        //        #region 添加超级管理员账号
+
+        //        var userSuperAdmin = new User();
+        //        userSuperAdmin.LoginName = CstUser.SuperAdmin;
+        //        userSuperAdmin.UserName = "超级管理员";
+        //        userSuperAdmin.Password = EncryptHelper.Md5(AccConfig.Consul.DefaultPassword);
+        //        userSuperAdmin.Gender = (int)EnumGender.Unknown;
+        //        userSuperAdmin.Birthday = null;
+        //        userSuperAdmin.MobilePhone = "";
+        //        userSuperAdmin.Email = "";
+        //        userSuperAdmin.Enable = true;
+        //        userSuperAdmin.Creater = "0";
+        //        userSuperAdmin.CreateTime = DateTime.Now;
+        //        userSuperAdmin.Updater = "0";
+        //        userSuperAdmin.UpdateTime = DateTime.Now;
+
+        //        if (this.userDAL.ExistUser(userSuperAdmin.LoginName) == false)
+        //        {
+        //            this.userDAL.AddUser(userSuperAdmin);
+        //        }
+
+        //        #endregion
+
+        //        #region 添加角色
+
+        //        var roleSuperAdmin = new Role();
+        //        roleSuperAdmin.RoleCode = CstRole.SuperAdmin;
+        //        roleSuperAdmin.RoleName = "超级管理员";
+        //        roleSuperAdmin.Enable = true;
+        //        roleSuperAdmin.Remark = "超级管理员角色";
+
+        //        if (this.roleDAL.ExistRole(roleSuperAdmin.RoleCode) == false)
+        //        {
+        //            this.roleDAL.AddRole(roleSuperAdmin);
+        //        }
+
+        //        #endregion
+
+        //        #region 添加权限
+
+        //        var authManageUser = new Authority();
+        //        authManageUser.AuthorityCode = CstAuthority.ManageUser;
+        //        authManageUser.AuthorityName = "管理用户";
+        //        authManageUser.Enable = true;
+        //        authManageUser.Remark = "增删查改用户的权限";
+
+        //        if (this.authorityDAL.ExistAuthority(authManageUser.AuthorityCode) == false)
+        //        {
+        //            this.authorityDAL.AddAuthority(authManageUser);
+        //        }
+
+        //        #endregion
+
+        //        #region 添加角色权限
+
+        //        var roleAuthManageUser = new RoleAuthority();
+        //        roleAuthManageUser.RoleCode = CstRole.SuperAdmin;
+        //        roleAuthManageUser.AuthorityCode = CstAuthority.ManageUser;
+        //        roleAuthManageUser.Creater = "0";
+        //        roleAuthManageUser.CreateTime = DateTime.Now;
+
+        //        this.roleAuthorityDAL.SetRoleAuthority(roleAuthManageUser.RoleCode, new List<RoleAuthority>() { roleAuthManageUser });
+
+        //        #endregion
+
+        //        #region 添加超级管理员账号角色
+
+        //        var userRoleSuperAdmin = new UserRole();
+        //        userRoleSuperAdmin.LoginName = userSuperAdmin.LoginName;
+        //        userRoleSuperAdmin.RoleCode = roleSuperAdmin.RoleCode;
+        //        userRoleSuperAdmin.Creater = "0";
+        //        userRoleSuperAdmin.CreateTime = DateTime.Now;
+
+        //        this.userRoleDAL.SetUserRole(userRoleSuperAdmin.LoginName, new List<UserRole>() { userRoleSuperAdmin });
+
+        //        #endregion
+
+        //        //提交事物
+        //        this.userDAL.AsTenant().CommitTran();
+
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Logger.Ins.Error(ex, "初始化数据库异常");
+
+        //        //回滚事物
+        //        this.userDAL.AsTenant().RollbackTran();
+
+        //        return false;
+        //    }
+        //}
+
         /// <summary>
         /// 初始化数据库
         /// </summary>
@@ -135,64 +266,75 @@ namespace tdb.account.bll
         {
             try
             {
+                //消息配置
+                var fullFileName = CommHelper.GetFullFileName("initData.json");
+                var jsonStr = File.ReadAllText(fullFileName);
+                var initData = JsonConvert.DeserializeObject<InitDataInfo>(jsonStr);
+
                 //开始事物
-                this._userDAL.AsTenant().BeginTran();
+                this.userDAL.AsTenant().BeginTran();
 
-                #region 添加超级管理员账号
+                #region 用户
 
-                var userSuperAdmin = new User();
-                userSuperAdmin.UserCode = CstRole.SuperAdmin;
-                userSuperAdmin.UserName = "超级管理员";
-                userSuperAdmin.Password = EncryptHelper.Md5("tdb123");
-                userSuperAdmin.Gender = (int)EnumGender.Unknown;
-                userSuperAdmin.Birthday = null;
-                userSuperAdmin.MobilePhone = "";
-                userSuperAdmin.Email = "";
-                userSuperAdmin.Enable = true;
-                userSuperAdmin.Creater = "0";
-                userSuperAdmin.CreateTime = DateTime.Now;
-                userSuperAdmin.Updater = "0";
-                userSuperAdmin.UpdateTime = DateTime.Now;
-
-                if (this._userDAL.ExistUser(userSuperAdmin.UserCode) == false)
+                foreach (var user in initData.Users)
                 {
-                    this._userDAL.AddUser(userSuperAdmin);
+                    user.Password = EncryptHelper.Md5(user.Password);
+                    if (this.userDAL.ExistUser(user.LoginName) == false)
+                    {
+                        this.userDAL.AddUser(user);
+                    }
                 }
 
                 #endregion
 
-                #region 添加超级管理员角色
+                #region 添加角色
 
-                var roleSuperAdmin = new Role();
-                roleSuperAdmin.RoleCode = CstRole.SuperAdmin;
-                roleSuperAdmin.RoleName = "超级管理员";
-                roleSuperAdmin.Enable = true;
-                roleSuperAdmin.Creater = "0";
-                roleSuperAdmin.CreateTime = DateTime.Now;
-                roleSuperAdmin.Updater = "0";
-                roleSuperAdmin.UpdateTime = DateTime.Now;
-
-                if (this._roleDAL.ExistRole(roleSuperAdmin.RoleCode) == false)
+                foreach (var role in initData.Roles)
                 {
-                    this._roleDAL.AddRole(roleSuperAdmin);
+                    if (this.roleDAL.ExistRole(role.RoleCode) == false)
+                    {
+                        this.roleDAL.AddRole(role);
+                    }
+                }
+
+                #endregion
+
+                #region 添加权限
+
+                foreach (var authority in initData.Authoritys)
+                {
+                    if (this.authorityDAL.ExistAuthority(authority.AuthorityCode) == false)
+                    {
+                        this.authorityDAL.AddAuthority(authority);
+                    }
+                }
+
+                #endregion
+
+                #region 添加角色权限
+
+                var lstRoleCode = initData.RoleAuthoritys.Select(m => m.RoleCode).Distinct().ToList();
+                foreach (var roleCode in lstRoleCode)
+                {
+                    var lstRoleAuthority = initData.RoleAuthoritys.FindAll(m => m.RoleCode == roleCode);
+                    this.roleAuthorityDAL.SetRoleAuthority(roleCode, lstRoleAuthority);
                 }
 
                 #endregion
 
                 #region 添加超级管理员账号角色
 
-                var userRoleSuperAdmin = new UserRole();
-                userRoleSuperAdmin.UserCode = userSuperAdmin.UserCode;
-                userRoleSuperAdmin.RoleCode = roleSuperAdmin.RoleCode;
-                userRoleSuperAdmin.Creater = "0";
-                userRoleSuperAdmin.CreateTime = DateTime.Now;
-
-                this._userRoleDAL.SetUserRole(userRoleSuperAdmin.UserCode, new List<UserRole>() { userRoleSuperAdmin });
+                var lstLoginName = initData.UserRoles.Select(m => m.LoginName).Distinct().ToList();
+                foreach (var loginName in lstLoginName)
+                {
+                    var lstUserRole = initData.UserRoles.FindAll(m => m.LoginName == loginName);
+                    this.userRoleDAL.SetUserRole(loginName, lstUserRole);
+                }
 
                 #endregion
 
                 //提交事物
-                this._userDAL.AsTenant().CommitTran();
+                this.userDAL.AsTenant().CommitTran();
 
                 return true;
             }
@@ -201,7 +343,7 @@ namespace tdb.account.bll
                 Logger.Ins.Error(ex, "初始化数据库异常");
 
                 //回滚事物
-                this._userDAL.AsTenant().RollbackTran();
+                this.userDAL.AsTenant().RollbackTran();
 
                 return false;
             }
@@ -212,14 +354,14 @@ namespace tdb.account.bll
         /// </summary>
         public void Test()
         {
-            this._userDAL.AsTenant().BeginTran();
+            //this.userDAL.AsTenant().BeginTran();
 
-            var user1 = this._userDAL.GetUser("admin");
-            user1.Email = "12345";
-            this._userDAL.UpdateUser(user1);
-            var user2 = this._userDAL.GetUser("admin");
+            //var user1 = this.userDAL.GetUser("admin");
+            //user1.Email = "12345";
+            //this.userDAL.UpdateUser(user1);
+            //var user2 = this.userDAL.GetUser("admin");
 
-            this._userDAL.AsTenant().RollbackTran();
+            //this.userDAL.AsTenant().RollbackTran();
         }
 
         #endregion

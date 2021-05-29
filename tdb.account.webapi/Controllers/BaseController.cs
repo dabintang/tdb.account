@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using tdb.account.dto.Common;
 using tdb.framework.webapi.APILog;
+using tdb.framework.webapi.Auth;
 
 namespace tdb.account.webapi.Controllers
 {
@@ -16,6 +18,7 @@ namespace tdb.account.webapi.Controllers
     [Route("api/[controller]/[action]")]
     [ApiController]
     [APILogActionFilter]
+    [Authorize]
     public class BaseController : ControllerBase
     {
         private OperatorInfo _CurUser;
@@ -35,11 +38,31 @@ namespace tdb.account.webapi.Controllers
                 if (this._CurUser == null)
                 {
                     this._CurUser = new OperatorInfo();
-                    this._CurUser.UserCode = HttpContext.User.FindFirst(ClaimTypes.Sid).Value;
+                    this._CurUser.LoginName = HttpContext.User.FindFirst(TdbClaimTypes.SID).Value;
                     this._CurUser.UserName = HttpContext.User.Identity.Name;
                 }
 
                 return this._CurUser;
+            }
+        }
+
+        /// <summary>
+        /// 当前用户拥有的角色
+        /// </summary>
+        protected virtual List<string> CurUserRoles
+        {
+            get
+            {
+                //无认证用户
+                if (HttpContext.User == null)
+                {
+                    return new List<string>();
+                }
+
+                var lstRoleClaim = HttpContext.User.FindAll(TdbClaimTypes.Role);
+                var lstRoleCode = lstRoleClaim.Select(m => m.Value).ToList();
+
+                return lstRoleCode;
             }
         }
     }

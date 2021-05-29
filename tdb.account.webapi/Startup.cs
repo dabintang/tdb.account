@@ -17,8 +17,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using tdb.account.common.Config;
+using tdb.account.common.Const;
+using tdb.account.webapi.AuthPolicys;
+using tdb.framework.webapi.Auth;
 using tdb.framework.webapi.Cache;
 using tdb.framework.webapi.Exceptions;
+using tdb.framework.webapi.IocAutofac.CacheAOP;
 using tdb.framework.webapi.Log;
 using tdb.framework.webapi.Swagger;
 using tdb.framework.webapi.Validation;
@@ -66,9 +70,15 @@ namespace tdb.account.webapi
             {
                 //异常处理
                 option.AddTdbGlobalException();
+                
+            })
+            .AddJsonOptions(options =>
+            {
+                //json字段名原样输出（null：不改变大小写；JsonNamingPolicy.CamelCase=驼峰法）
+                options.JsonSerializerOptions.PropertyNamingPolicy = null; 
             });
 
-            //认证授权
+            //认证
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -78,11 +88,15 @@ namespace tdb.account.webapi
             {
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
+                    NameClaimType = TdbClaimTypes.Name,
+                    RoleClaimType = TdbClaimTypes.Role,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(AccConfig.Consul.Token.SecretKey)),
-                    //不验Audience
-                    ValidateAudience = false,
-                    //不验Issuer
-                    ValidateIssuer = false,
+                    //是否验Audience
+                    ValidateAudience = true,
+                    ValidAudience = AccConfig.Consul.Token.Audience,
+                    //是否验Issuer
+                    ValidateIssuer = true,
+                    ValidIssuer = AccConfig.Consul.Token.Issuer,
                     //允许的服务器时间偏移量
                     ClockSkew = TimeSpan.Zero,
                 };
@@ -111,6 +125,15 @@ namespace tdb.account.webapi
                         return Task.CompletedTask;
                     }
                 };
+            });
+
+            //授权
+            services.AddAuthorization(options =>
+            {
+                //需要用户管理权限
+                options.AddPolicy(
+                    CstPolicy.NeedAuthorityManageUser, 
+                    policy => policy.Requirements.Add(new AuthorityRequirement(CstAuthority.ManageUser)));
             });
 
             //SqlSugar.IOC
@@ -214,6 +237,9 @@ namespace tdb.account.webapi
         {
             //新模块组件注册    
             builder.RegisterModule<AutofacModuleRegister>();
+
+            // 类型注入
+            builder.Register(c => new TdbCacheInterceptor()).SingleInstance();
         }
     }
 }

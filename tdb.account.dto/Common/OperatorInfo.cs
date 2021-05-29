@@ -12,7 +12,7 @@ namespace tdb.account.dto.Common
         /// <summary>
         /// 登录名
         /// </summary>           
-        public string UserCode { get; set; }
+        public string LoginName { get; set; }
 
         /// <summary>
         /// 用户名

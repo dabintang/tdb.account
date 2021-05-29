@@ -14,12 +14,17 @@ namespace tdb.account.webapi
     public class AutofacModuleRegister : AutofacModule
     {
         /// <summary>
-        /// 获取需要注册的程序集名称集合
+        /// 获取需要注册的程序集集合
         /// </summary>
         /// <returns></returns>
-        protected override List<string> GetRegisterAssemblyNames()
+        protected override List<Assembly> GetRegisterAssemblys()
         {
-            return new List<string>() { "tdb.account.dal", "tdb.account.bll" };
+            var list = new List<Assembly>();
+            list.Add(Assembly.GetExecutingAssembly());
+            list.Add(Assembly.Load("tdb.account.dal"));
+            list.Add(Assembly.Load("tdb.account.bll"));
+
+            return list;
         }
     }
 }

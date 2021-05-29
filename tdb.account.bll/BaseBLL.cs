@@ -57,7 +57,7 @@ namespace tdb.account.bll
             //创建者
             if (CommHelper.IsExistProperty(model, FieldName_Creater))
             {
-                CommHelper.EmitSet(model, FieldName_Creater, oper.UserCode);
+                CommHelper.EmitSet(model, FieldName_Creater, oper.LoginName);
             }
 
             //创建时间
@@ -77,7 +77,7 @@ namespace tdb.account.bll
             //更新者
             if (CommHelper.IsExistProperty(model, FieldName_Updater))
             {
-                CommHelper.EmitSet(model, FieldName_Updater, oper.UserCode);
+                CommHelper.EmitSet(model, FieldName_Updater, oper.LoginName);
             }
 
             //更新时间
