@@ -44,7 +44,7 @@ namespace tdb.account.webapi.Controllers
         /// <returns>token</returns>
         [HttpPost]
         [AllowAnonymous]
-        public BaseItemRes<string> Login([FromBody]LoginReq req)
+        public BaseItemRes<string> Login([FromBody] LoginReq req)
         {
             var res = this.userBLL.Login(req);
             return res;
@@ -84,8 +84,25 @@ namespace tdb.account.webapi.Controllers
         [Authorize(Policy = CstPolicy.NeedAuthorityManageUser)]
         public BaseItemRes<UserInfo> GetUser([FromQuery] GetUserReq req)
         {
+            var ip = HttpContext.Connection.RemoteIpAddress.ToString();
+
             var userInfo = this.userBLL.GetUser(req);
             return BaseItemRes<UserInfo>.Ok(userInfo);
+        }
+
+        /// <summary>
+        /// 获取客户Ip
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public string GetClientUserIp(HttpContext context)
+        {
+            var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (string.IsNullOrEmpty(ip))
+            {
+                ip = context.Connection.RemoteIpAddress.ToString();
+            }
+            return ip;
         }
 
         /// <summary>

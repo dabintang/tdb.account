@@ -19,6 +19,8 @@ using System.Threading.Tasks;
 using tdb.account.common.Config;
 using tdb.account.common.Const;
 using tdb.account.webapi.AuthPolicys;
+using tdb.consul.services;
+using tdb.framework.webapi.APILog;
 using tdb.framework.webapi.Auth;
 using tdb.framework.webapi.Cache;
 using tdb.framework.webapi.Exceptions;
@@ -57,6 +59,14 @@ namespace tdb.account.webapi
             //配置
             services.AddTdbConfig();
 
+            //是否已设置consul配置
+            if (AccConfig.Consul.HadConsulConfig() == false)
+            {
+                Console.WriteLine("检测到未设置consul配置，以临时模式启动！设置consul配置后请【重新启动】！");
+                Console.ReadKey();
+                return;
+            }
+
             //缓存
             services.AddTdbRedisCache(AccConfig.Consul.Redis.ConnectString.ToArray());
 
@@ -65,18 +75,6 @@ namespace tdb.account.webapi
 
             //参数验证
             services.AddTdbParamValidate();
-
-            services.AddControllers(option =>
-            {
-                //异常处理
-                option.AddTdbGlobalException();
-                
-            })
-            .AddJsonOptions(options =>
-            {
-                //json字段名原样输出（null：不改变大小写；JsonNamingPolicy.CamelCase=驼峰法）
-                options.JsonSerializerOptions.PropertyNamingPolicy = null; 
-            });
 
             //认证
             services.AddAuthentication(x =>
@@ -91,14 +89,14 @@ namespace tdb.account.webapi
                     NameClaimType = TdbClaimTypes.Name,
                     RoleClaimType = TdbClaimTypes.Role,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(AccConfig.Consul.Token.SecretKey)),
-                    //是否验Audience
-                    ValidateAudience = true,
+                        //是否验Audience
+                        ValidateAudience = true,
                     ValidAudience = AccConfig.Consul.Token.Audience,
-                    //是否验Issuer
-                    ValidateIssuer = true,
+                        //是否验Issuer
+                        ValidateIssuer = true,
                     ValidIssuer = AccConfig.Consul.Token.Issuer,
-                    //允许的服务器时间偏移量
-                    ClockSkew = TimeSpan.Zero,
+                        //允许的服务器时间偏移量
+                        ClockSkew = TimeSpan.Zero,
                 };
                 o.Events = new JwtBearerEvents()
                 {
@@ -132,7 +130,7 @@ namespace tdb.account.webapi
             {
                 //需要用户管理权限
                 options.AddPolicy(
-                    CstPolicy.NeedAuthorityManageUser, 
+                    CstPolicy.NeedAuthorityManageUser,
                     policy => policy.Requirements.Add(new AuthorityRequirement(CstAuthority.ManageUser)));
             });
 
@@ -194,6 +192,38 @@ namespace tdb.account.webapi
                     }
                 });
             });
+
+            //httpreports
+            services.AddHttpReports(o =>
+                    {
+                        o.Switch = AccConfig.Consul.HttpReports.Switch;
+                        o.RequestFilter = AccConfig.Consul.HttpReports.RequestFilter.ToArray();
+                        o.WithRequest = AccConfig.Consul.HttpReports.WithRequest;
+                        o.WithResponse = AccConfig.Consul.HttpReports.WithResponse;
+                        o.WithCookie = AccConfig.Consul.HttpReports.WithCookie;
+                        o.WithHeader = AccConfig.Consul.HttpReports.WithHeader;
+                    })
+                    .AddHttpTransport(o =>
+                    {
+                        o.CollectorAddress = new Uri(AccConfig.Consul.HttpReports.Transport.CollectorAddress);
+                        o.DeferSecond = AccConfig.Consul.HttpReports.Transport.DeferSecond;
+                        o.DeferThreshold = AccConfig.Consul.HttpReports.Transport.DeferThreshold;
+                    });
+
+            services.AddControllers(option =>
+            {
+                //异常处理
+                option.AddTdbGlobalException();
+
+                //接口调用日志
+                option.Filters.Add(typeof(APILogActionFilterAttribute));
+            })
+            .AddJsonOptions(options =>
+            {
+                //json字段名原样输出（null：不改变大小写；JsonNamingPolicy.CamelCase=驼峰法）
+                options.JsonSerializerOptions.PropertyNamingPolicy = null;
+            });
+
         }
 
         /// <summary>
@@ -201,7 +231,8 @@ namespace tdb.account.webapi
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        /// <param name="appLifetime"></param>
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
         {
             if (env.IsDevelopment())
             {
@@ -212,6 +243,7 @@ namespace tdb.account.webapi
 
             //认证
             app.UseAuthentication();
+
             //授权
             app.UseAuthorization();
 
@@ -222,6 +254,25 @@ namespace tdb.account.webapi
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "V1 Docs");
                 c.DocExpansion(DocExpansion.None);
             });
+
+            //httpreports
+            app.UseHttpReports();
+
+            //本地服务URI
+            var localUri = new Uri(AccConfig.App.ApiUrl);
+
+            //注册consul
+            ConsulServicesHelper.RegisterToConsul(
+                AccConfig.App.Consul.IP,
+                AccConfig.App.Consul.Port,
+                localUri.Host,
+                localUri.Port,
+                AccConfig.App.Consul.ServiceCode,
+                $"{AccConfig.App.ApiUrl}/tdbaccount/Sys/HealthCheck",//"http://10.1.49.45:5000/api/Consul/HealthCheck",
+                TimeSpan.FromMinutes(10),
+                TimeSpan.FromMinutes(1),
+                TimeSpan.FromSeconds(30),
+                appLifetime);
 
             app.UseEndpoints(endpoints =>
             {

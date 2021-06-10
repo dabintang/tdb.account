@@ -15,9 +15,8 @@ namespace tdb.account.webapi.Controllers
     /// <summary>
     /// 控制器基类
     /// </summary>
-    [Route("api/[controller]/[action]")]
+    [Route("tdbaccount/[controller]/[action]")]
     [ApiController]
-    [APILogActionFilter]
     [Authorize]
     public class BaseController : ControllerBase
     {
