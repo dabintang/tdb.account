@@ -11,9 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="HttpReports" Version="2.5.14" />
-    <PackageReference Include="HttpReports.Transport.Http" Version="2.5.14" />
-    <PackageReference Include="tdb.framework.webapi" Version="2.1.0.20" />
+    <PackageReference Include="tdb.framework.webapi" Version="2.1.0.21" />
   </ItemGroup>
 
 </Project>
