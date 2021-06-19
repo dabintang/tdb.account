@@ -39,6 +39,28 @@ namespace tdb.account.webapi.Controllers
         #region 接口
 
         /// <summary>
+        /// 获取appsettings.json配置
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Authorize(Roles = CstRole.SuperAdmin)]
+        public BaseItemRes<AppConfig> GetAppConfig()
+        {
+            return BaseItemRes<AppConfig>.Ok(AccConfig.App);
+        }
+
+        /// <summary>
+        /// 获取consul配置
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Authorize(Roles = CstRole.SuperAdmin)]
+        public BaseItemRes<ConsulConfig> GetConsulConfig()
+        {
+            return BaseItemRes<ConsulConfig>.Ok(AccConfig.Consul);
+        }
+
+        /// <summary>
         /// 还原consul配置
         /// </summary>
         /// <param name="file">配置文件（.json文件）</param>
