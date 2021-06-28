@@ -71,7 +71,7 @@ namespace tdb.account.webapi
             services.AddTdbRedisCache(AccConfig.Consul.Redis.ConnectString.ToArray());
 
             //日志
-            services.AddTdbMySqlNLogger(AccConfig.Consul.DBLogConnStr, $"{AccConfig.App.Consul.ServiceCode}_{AccConfig.App.ApiUrl}");
+            services.AddTdbMySqlNLogger(AccConfig.Consul.DBLogConnStr, AccConfig.App.Consul.ServiceCode, AccConfig.App.ApiUrl);
 
             //参数验证
             services.AddTdbParamValidate();

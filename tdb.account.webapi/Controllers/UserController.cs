@@ -89,23 +89,6 @@ namespace tdb.account.webapi.Controllers
             var userInfo = this.userBLL.GetUser(req);
             return BaseItemRes<UserInfo>.Ok(userInfo);
         }
-        
-        /// <summary>
-        /// 获取客户Ip
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [AllowAnonymous]
-        public string GetClientUserIp(HttpContext context)
-        {
-            var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-            if (string.IsNullOrEmpty(ip))
-            {
-                ip = context.Connection.RemoteIpAddress.ToString();
-            }
-            return ip;
-        }
 
         /// <summary>
         /// 获取自己的用户信息
